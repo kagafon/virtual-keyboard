@@ -1,0 +1,79 @@
+html {
+  font-size: 16px;
+  font-family: sans-serif;
+}
+
+.test-zone {
+  width: 700px;
+  display: flex;
+  flex-direction: column;
+  padding: 2px;
+}
+.test-zone > * {
+  padding: 5px 0;
+}
+.test-zone > textarea {
+  padding: 5px;
+}
+
+.instructions {
+  width: 200px;
+  padding: 2px;
+}
+
+.keyboard {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.keyboard_shifted {
+  text-transform: capitalize;
+}
+.keyboard__row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 3px 0;
+}
+.keyboard__btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #6b5f65;
+  background-color: #86777f;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+.keyboard__btn_pressed {
+  background-color: #9e9298;
+}
+.keyboard__btn_backspace {
+  width: 95px;
+}
+.keyboard__btn_tab {
+  width: 50px;
+}
+.keyboard__btn_capslock {
+  width: 85px;
+}
+.keyboard__btn_shift {
+  width: 120px;
+}
+.keyboard__btn_alt {
+  width: 50px;
+}
+.keyboard__btn_ctrl {
+  width: 55px;
+}
+.keyboard__btn_enter {
+  width: 80px;
+}
+.keyboard__btn_space {
+  width: 265px;
+}
+
+/*# sourceMappingURL=style.css.map */
