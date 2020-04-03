@@ -96,7 +96,7 @@ const buttons = {
     row: 4, className: 'keyboard__btn_space', ru: { shift: ' ', noshift: ' ' }, en: { shift: ' ', noshift: ' ' },
   },
   AltRight: {
-    row: 4, type: 'control', subtype: 'sticky', className: 'keyboard__btn_alt', ru: { shift: 'Alt', noshift: 'Alt' }, en: { shift: 'Alt', noshift: 'Alt' },
+    row: 4, type: 'control', className: 'keyboard__btn_alt', ru: { shift: 'Alt', noshift: 'Alt' }, en: { shift: 'Alt', noshift: 'Alt' },
   },
   ControlRight: {
     row: 4, type: 'control', subtype: 'sticky', className: 'keyboard__btn_ctrl', ru: { shift: 'Ctrl', noshift: 'Ctrl' }, en: { shift: 'Ctrl', noshift: 'Ctrl' },
