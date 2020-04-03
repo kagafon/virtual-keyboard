@@ -3,7 +3,12 @@ import buttons from './keyboardCodes.js';
 
 const keyboard = document.createElement('div');
 const settings = {
-  lang: 'ru',
+  get lang() {
+    return localStorage.getItem('virtual-keyboard.lang') || 'ru';
+  },
+  set lang(value) {
+    localStorage.setItem('virtual-keyboard.lang', value);
+  },
   shift: 'noshift',
   prevKeyboardCode: null,
   charRepeatTimer: null,
@@ -46,15 +51,25 @@ const setShift = (shift) => {
   }
   updateButtons();
 };
+const setCtrl = (ctrl) => {
+  if (ctrl) {
+    settings.ctrl = 'ctrl';
+  } else {
+    [buttons.ControlLeft,
+      buttons.ControlRight].forEach((x) => {
+      x.uiElement.classList.remove(buttonPressedClassName);
+    });
+
+    settings.ctrl = 'noctrl';
+  }
+  updateButtons();
+};
 const checkSpecialKeysCombination = () => {
   if (settings.ctrl === 'ctrl' && settings.shift === 'shift') {
     settings.lang = settings.lang === 'ru' ? 'en' : 'ru';
     settings.ctrl = 'noctrl';
     setShift(false);
-    [buttons.ControlLeft,
-      buttons.ControlRight].forEach((x) => {
-      x.uiElement.classList.remove(buttonPressedClassName);
-    });
+    setCtrl(false);
     return false;
   }
   return true;
@@ -156,29 +171,6 @@ const moveCursorY = (step) => {
       } else targetControl.selectionStart += rows[foundRowIdx].length + 1;
     }
   }
-
-
-  /*
-  const rowOffset = targetControl.value.lastIndexOf('\n', targetControl.selectionStart);
-  if (rowOffset > 0) {
-    if (step > 0) {
-      const newRowStart = targetControl.value.lastIndexOf('\n', rowOffset);
-      if (newRowStart > 0) {
-        targetControl.selectionStart = rowOffset + newRowStart;
-      } else {
-        targetControl.selectionStart = 0;
-      }
-    } else {
-      const newRowStart = targetControl.value.indexOf('\n', rowOffset);
-      if (newRowStart > 0) {
-        targetControl.selectionStart = rowOffset + newRowStart;
-      } else {
-        targetControl.selectionStart = targetControl.value.length;
-      }
-    }
-  } else {
-    targetControl.selectionStart = 0;
-  } */
   targetControl.selectionEnd = targetControl.selectionStart;
 };
 
@@ -191,6 +183,7 @@ const setRepeatButton = (callback) => {
     callback, repeatTimeout,
   );
 };
+
 const createBtnMouseDownHandler = (sourceBtn) => () => {
   if (targetControl) {
     if (sourceBtn.type !== 'control') {
@@ -225,6 +218,7 @@ const createBtnMouseDownHandler = (sourceBtn) => () => {
     } else {
       sourceBtn.uiElement.classList.add(buttonPressedClassName);
       setShift(false);
+      setCtrl(false);
       if (sourceBtn.keyDown) sourceBtn.keyDown();
     }
   }
@@ -273,12 +267,16 @@ const addKeyboard = (body) => {
 
 const processKeyDown = (evt) => {
   if (buttons[evt.code]) {
-    if (buttons[evt.code].keyDown) buttons[evt.code].keyDown(settings);
-
     if (evt.code === 'CapsLock') {
-      buttons[evt.code].uiElement.classList.toggle(buttonPressedClassName);
-      // keyboard.classList.toggle(keyboardShiftedClassName);
+      if (buttons[evt.code].uiElement.classList.contains(buttonPressedClassName)) {
+        buttons[evt.code].uiElement.classList.remove(buttonPressedClassName);
+        buttons[evt.code].keyUp(settings);
+      } else {
+        buttons[evt.code].uiElement.classList.add(buttonPressedClassName);
+        buttons[evt.code].keyDown(settings);
+      }
     } else {
+      if (buttons[evt.code].keyDown) buttons[evt.code].keyDown(settings);
       buttons[evt.code].uiElement.classList.add(buttonPressedClassName);
     }
     settings.prevKeyboardCode = evt.code;
@@ -287,11 +285,11 @@ const processKeyDown = (evt) => {
 
 const processKeyUp = (evt) => {
   if (buttons[evt.code]) {
-    if (buttons[evt.code].keyDown) buttons[evt.code].keyUp(settings);
-    settings.prevKeyboardCode = null;
     if (evt.code !== 'CapsLock') {
+      if (buttons[evt.code].keyDown) buttons[evt.code].keyUp(settings);
       buttons[evt.code].uiElement.classList.remove(buttonPressedClassName);
     }
+    settings.prevKeyboardCode = null;
   }
 };
 
@@ -302,6 +300,11 @@ const processBlur = () => {
   }
 };
 
+const loadKeyboardState = (evt) => {
+  if (evt.getModifierState('CapsLock')) processKeyDown({ code: 'CapsLock' });
+  document.removeEventListener('mousemove', loadKeyboardState);
+};
+
 window.addEventListener('load', () => {
   const body = document.querySelector('body');
   const workingArea = document.createElement('div');
@@ -310,14 +313,16 @@ window.addEventListener('load', () => {
   targetControl = document.createElement('textarea');
   targetControl.rows = 10;
   targetControl.autofocus = true;
-  targetControl.wrap = 'hard';
-  targetControl.cols = 10;
   targetControl.addEventListener('blur', () => targetControl.focus());
   workingArea.appendChild(targetControl);
   targetControl.addEventListener('keydown', processKeyDown);
   targetControl.addEventListener('keyup', processKeyUp);
+  document.addEventListener('mousemove', loadKeyboardState);
   document.addEventListener('blur', processBlur);
   addKeyboard(workingArea);
   updateButtons();
-  targetControl.placeholder = 'Please note instructions below:\r\nUse arrow buttons to move cursor in the text area\nUse Shift+Ctrl to switch language';
+  targetControl.placeholder = 'Please note instructions below:'
+    + '\nUse arrow buttons to move cursor in the text area'
+    + '\nUse Shift+Ctrl to switch language'
+    + '\nShift and Ctrl are "sticky" - stays pressed until other button is tapped';
 });
