@@ -5,6 +5,12 @@ html {
   font-family: sans-serif;
 }
 
+body {
+  display: flex;
+  width: 1020px;
+  margin: 0 auto;
+}
+
 .test-zone {
   width: 700px;
   display: flex;
@@ -16,6 +22,11 @@ html {
 
   & > textarea {
     padding: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: nowrap;
+    &::placeholder {
+      white-space: pre;
+    }
   }
 }
 

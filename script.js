@@ -14,6 +14,7 @@ const settings = {
 const buttonPressedClassName = 'keyboard__btn_pressed';
 const keyboardShiftedClassName = 'keyboard_shifted';
 let targetControl = null;
+const repeatTimeout = 200;
 
 const updateButtons = (cond) => {
   let keysToUpdate = Object.keys(buttons);
@@ -60,73 +61,40 @@ const checkSpecialKeysCombination = () => {
 };
 
 // Additional keys processing
-const shiftDown = () => {
-  setShift(true);
+const createDefaultControlKeyProcessing = (callback) => () => {
+  callback();
   checkSpecialKeysCombination();
   updateButtons((x) => !buttons[x].default);
 };
 
-const shiftUp = () => {
-  settings.shift = 'noshift';
-  updateButtons((x) => !buttons[x].default);
-};
+buttons.CapsLock.keyDown = createDefaultControlKeyProcessing(() => { settings.capsLock = 'caps'; });
+buttons.CapsLock.keyUp = createDefaultControlKeyProcessing(() => { settings.capsLock = 'nocaps'; });
 
-const ctrlDown = () => {
-  settings.ctrl = 'ctrl';
-  checkSpecialKeysCombination();
-  updateButtons((x) => !buttons[x].default);
-};
+buttons.ShiftLeft.keyDown = createDefaultControlKeyProcessing(() => { setShift(true); });
+buttons.ShiftLeft.keyUp = createDefaultControlKeyProcessing(() => { settings.shift = 'noshift'; });
+buttons.ShiftRight.keyDown = createDefaultControlKeyProcessing(() => { setShift(true); });
+buttons.ShiftRight.keyUp = createDefaultControlKeyProcessing(() => { settings.shift = 'noshift'; });
 
-const ctrlUp = () => {
-  settings.ctrl = 'noctrl';
-  updateButtons((x) => !buttons[x].default);
-};
+buttons.ControlRight.keyDown = createDefaultControlKeyProcessing(() => { settings.ctrl = 'ctrl'; });
+buttons.ControlRight.keyUp = createDefaultControlKeyProcessing(() => { settings.ctrl = 'noctrl'; });
+buttons.ControlLeft.keyDown = createDefaultControlKeyProcessing(() => { settings.ctrl = 'ctrl'; });
+buttons.ControlLeft.keyUp = createDefaultControlKeyProcessing(() => { settings.ctrl = 'noctrl'; });
 
-const altDown = () => {
-  settings.ctrl = 'alt';
-  updateButtons((x) => !buttons[x].default);
-};
-
-const altUp = () => {
-  settings.ctrl = 'noalt';
-  updateButtons((x) => !buttons[x].default);
-};
-
-const capsLockDown = () => {
-  settings.capsLock = 'caps';
-  updateButtons((x) => !buttons[x].default);
-};
-
-const capsLockUp = () => {
-  settings.capsLock = 'nocaps';
-  updateButtons((x) => !buttons[x].default);
-};
-
-buttons.CapsLock.keyDown = capsLockDown;
-buttons.CapsLock.keyUp = capsLockUp;
-
-buttons.ShiftLeft.keyDown = shiftDown;
-buttons.ShiftLeft.keyUp = shiftUp;
-buttons.ShiftRight.keyDown = shiftDown;
-buttons.ShiftRight.keyUp = shiftUp;
-
-buttons.ControlRight.keyDown = ctrlDown;
-buttons.ControlRight.keyUp = ctrlUp;
-buttons.ControlLeft.keyDown = ctrlDown;
-buttons.ControlLeft.keyUp = ctrlUp;
-
-buttons.AltRight.keyDown = altDown;
-buttons.AltRight.keyUp = altUp;
-buttons.AltLeft.keyDown = altDown;
-buttons.AltLeft.keyUp = altUp;
+buttons.AltRight.keyDown = createDefaultControlKeyProcessing(() => { settings.alt = 'alt'; });
+buttons.AltRight.keyUp = createDefaultControlKeyProcessing(() => { settings.alt = 'noalt'; });
+buttons.AltLeft.keyDown = createDefaultControlKeyProcessing(() => { settings.alt = 'alt'; });
+buttons.AltLeft.keyUp = createDefaultControlKeyProcessing(() => { settings.alt = 'noalt'; });
 
 /* removeChar: false - before, true - after */
 const updateTextarea = (charToAdd, removeChar) => {
+  let positionToRestore = targetControl.selectionStart;
   if (charToAdd) {
-    targetControl.value += charToAdd;
+    targetControl.value = targetControl.value.substring(0, targetControl.selectionStart)
+      + charToAdd
+      + targetControl.value.substring(targetControl.selectionEnd);
+    positionToRestore += 1;
   }
   if (removeChar !== undefined) {
-    let positionToRestore = targetControl.selectionStart;
     if (targetControl.selectionStart !== targetControl.selectionEnd) {
       targetControl.value = targetControl.value.substring(0, targetControl.selectionStart)
         + targetControl.value.substring(targetControl.selectionEnd);
@@ -138,29 +106,114 @@ const updateTextarea = (charToAdd, removeChar) => {
         + targetControl.value.substring(targetControl.selectionStart);
       positionToRestore -= 1;
     }
-    targetControl.selectionEnd = positionToRestore;
+  }
+  targetControl.selectionEnd = positionToRestore;
+};
+
+const moveCursorX = (step) => {
+  if (targetControl.selectionStart === targetControl.selectionEnd) {
+    targetControl.selectionStart += step;
+    targetControl.selectionEnd = targetControl.selectionStart;
+  } else if (step < 0) {
+    targetControl.selectionStart += step;
+  } else {
+    targetControl.selectionEnd += step;
   }
 };
 
+const moveCursorY = (step) => {
+  const rows = targetControl.value.split('\n');
+  let rowSelectionStart = targetControl.selectionStart;
+  let foundRowIdx = -1;
+  if (rows.some((x, idx) => {
+    if (rowSelectionStart > x.length) {
+      rowSelectionStart -= x.length + 1;
+      return false;
+    }
+    foundRowIdx = idx;
+    return true;
+    // Found selection in row
+  })) {
+    if (step < 0) {
+    // First row and trying to move up - jump to the beginning
+      if (foundRowIdx === 0) targetControl.selectionStart = 0;
+      else {
+        const targetRow = rows[foundRowIdx - 1];
+        // Not enough symbols in target row - move to end
+        if (targetRow.length <= rowSelectionStart) {
+          targetControl.selectionStart -= rowSelectionStart + 1;
+        } else targetControl.selectionStart -= targetRow.length + 1;
+      }
+    } else if (foundRowIdx === rows.length - 1) {
+      // Last row and trying to move down - jump to the end
+      targetControl.selectionStart = targetControl.value.length;
+    } else {
+      const targetRow = rows[foundRowIdx + 1];
+      if (targetRow.length <= rowSelectionStart) {
+        // Not enough symbols in target row - move to end
+        targetControl.selectionStart += rows[foundRowIdx].length
+            - rowSelectionStart + targetRow.length + 1;
+      } else targetControl.selectionStart += rows[foundRowIdx].length + 1;
+    }
+  }
+
+
+  /*
+  const rowOffset = targetControl.value.lastIndexOf('\n', targetControl.selectionStart);
+  if (rowOffset > 0) {
+    if (step > 0) {
+      const newRowStart = targetControl.value.lastIndexOf('\n', rowOffset);
+      if (newRowStart > 0) {
+        targetControl.selectionStart = rowOffset + newRowStart;
+      } else {
+        targetControl.selectionStart = 0;
+      }
+    } else {
+      const newRowStart = targetControl.value.indexOf('\n', rowOffset);
+      if (newRowStart > 0) {
+        targetControl.selectionStart = rowOffset + newRowStart;
+      } else {
+        targetControl.selectionStart = targetControl.value.length;
+      }
+    }
+  } else {
+    targetControl.selectionStart = 0;
+  } */
+  targetControl.selectionEnd = targetControl.selectionStart;
+};
+
+const setRepeatButton = (callback) => {
+  callback();
+  if (settings.charRepeatTimer !== null) {
+    clearInterval(settings.charRepeatTimer);
+  }
+  settings.charRepeatTimer = setInterval(
+    callback, repeatTimeout,
+  );
+};
 const createBtnMouseDownHandler = (sourceBtn) => () => {
   if (targetControl) {
     if (sourceBtn.type !== 'control') {
-      updateTextarea(sourceBtn[settings.lang][settings.shift] || sourceBtn.uiElement.innerText);
-      settings.charRepeatTimer = setInterval(
-        () => updateTextarea(sourceBtn[settings.lang][settings.shift]
-                  || sourceBtn[settings.lang].default), 200,
-      );
+      const valueToSet = sourceBtn[settings.lang][settings.shift] || sourceBtn.uiElement.innerText;
+      setRepeatButton(() => updateTextarea(valueToSet));
     } else if (sourceBtn.en.noshift === 'Backspace') {
-      updateTextarea(null, false);
-      settings.charRepeatTimer = setInterval(
-        () => updateTextarea(null, false), 200,
-      );
+      setRepeatButton(() => updateTextarea(null, false));
     } else if (sourceBtn.en.noshift === 'Del') {
-      updateTextarea(null, true);
-      settings.charRepeatTimer = setInterval(
-        () => updateTextarea(null, true), 200,
-      );
+      setRepeatButton(() => updateTextarea(null, true));
+    } else if (sourceBtn.en.noshift === 'Enter') {
+      setRepeatButton(() => updateTextarea('\n'));
+    } else if (sourceBtn.en.noshift === 'Tab') {
+      setRepeatButton(() => updateTextarea('\t'));
+    } else if (sourceBtn.en.default === '\u2190') {
+      setRepeatButton(() => moveCursorX(-1));
+    } else if (sourceBtn.en.default === '\u2192') {
+      setRepeatButton(() => moveCursorX(1));
+    } else if (sourceBtn.en.default === '\u2191') {
+      setRepeatButton(() => moveCursorY(-1));
+    } else if (sourceBtn.en.default === '\u2193') {
+      setRepeatButton(() => moveCursorY(1));
     }
+
     if (sourceBtn.subtype === 'sticky') {
       if (sourceBtn.uiElement.classList.contains(buttonPressedClassName)) {
         sourceBtn.uiElement.classList.remove(buttonPressedClassName);
@@ -207,6 +260,7 @@ const addButtons = (kbrd) => {
     btn.innerText = sourceBtn[settings.lang][settings.shift];
     btn.addEventListener('mousedown', createBtnMouseDownHandler(sourceBtn));
     btn.addEventListener('mouseup', createBtnMouseUpHandler(sourceBtn));
+    btn.addEventListener('mouseout', createBtnMouseUpHandler(sourceBtn));
     row.appendChild(btn);
   });
 };
@@ -256,6 +310,8 @@ window.addEventListener('load', () => {
   targetControl = document.createElement('textarea');
   targetControl.rows = 10;
   targetControl.autofocus = true;
+  targetControl.wrap = 'hard';
+  targetControl.cols = 10;
   targetControl.addEventListener('blur', () => targetControl.focus());
   workingArea.appendChild(targetControl);
   targetControl.addEventListener('keydown', processKeyDown);
@@ -263,4 +319,5 @@ window.addEventListener('load', () => {
   document.addEventListener('blur', processBlur);
   addKeyboard(workingArea);
   updateButtons();
+  targetControl.placeholder = 'Please note instructions below:\r\nUse arrow buttons to move cursor in the text area\nUse Shift+Ctrl to switch language';
 });
