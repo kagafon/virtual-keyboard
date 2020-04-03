@@ -266,6 +266,10 @@ const addKeyboard = (body) => {
 };
 
 const processKeyDown = (evt) => {
+  if (evt instanceof KeyboardEvent && evt.code !== 'CapsLock') {
+    if (evt.getModifierState('CapsLock') !== (settings.capsLock === 'caps')) processKeyDown({ code: 'CapsLock' });
+  }
+
   if (buttons[evt.code]) {
     if (evt.code === 'CapsLock') {
       if (buttons[evt.code].uiElement.classList.contains(buttonPressedClassName)) {
