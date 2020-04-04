@@ -325,8 +325,9 @@ window.addEventListener('load', () => {
   document.addEventListener('blur', processBlur);
   addKeyboard(workingArea);
   updateButtons();
-  targetControl.placeholder = 'Please note instructions below:'
-    + '\nUse arrow buttons to move cursor in the text area'
-    + '\nUse Shift+Ctrl to switch language'
-    + '\nShift and Ctrl are "sticky" - stays pressed until other button is tapped';
+  targetControl.placeholder = ['Please note instructions below:',
+    'Use arrow buttons to move cursor in the text area',
+    'Shift and Ctrl screen buttons stay "pressed" until other button is clicked ("sticky")',
+    'Use Shift+Ctrl to switch language ("pressed" state is removed in this case)',
+    'Designed for MS Windows'].join('\n');
 });
