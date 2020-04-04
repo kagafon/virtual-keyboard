@@ -78,6 +78,9 @@ body {
 
     &_backspace {
       width: 95px;
+      &.keyboard__btn_pressed {
+        transform: scale(1.03);
+      }
     }
 
     &_tab {
@@ -95,6 +98,9 @@ body {
 
     &_shift {
       width: 120px;
+      &.keyboard__btn_pressed {
+        transform: scale(1.03);
+      }
     }
 
     &_alt {
