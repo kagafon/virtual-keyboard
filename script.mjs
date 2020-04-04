@@ -1,6 +1,5 @@
-/* eslint-disable import/extensions */
-import Keyboard from './components/keyboard.js';
-import Textarea from './components/textarea.js';
+import Keyboard from './components/keyboard';
+import Textarea from './components/textarea';
 
 window.addEventListener('load', () => {
   const body = document.querySelector('body');

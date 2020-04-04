@@ -1,7 +1,6 @@
-/* eslint-disable import/extensions */
-import DefaultButton from './buttons/defaultButton.js';
-import SpecialButtons from './buttons/specialButton.js';
-import buttonKeys from './keyboardCodes.js';
+import DefaultButton from './buttons/defaultButton';
+import SpecialButtons from './buttons/specialButton';
+import buttonKeys from './keyboardCodes';
 
 const keyboardShiftedClassName = 'keyboard_shifted';
 

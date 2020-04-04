@@ -1,11 +1,3 @@
-/* const shiftDown = () => (settings) => {
-  settings.shift = 'shift';
-};
-
-const shiftUp = () => (settings) => {
-  settings.shift = 'noshift';
-}; */
-
 export default {
   Backquote: { row: 0, ru: { shift: 'Ё', noshift: 'ё' }, en: { shift: '~', noshift: '`' } },
   Digit1: { row: 0, ru: { shift: '!', noshift: '1' }, en: { shift: '!', noshift: '1' } },
@@ -64,7 +56,7 @@ export default {
   },
 
   ShiftLeft: {
-    row: 3, type: 'control', subtype: 'sticky', /* keyDown: shiftDown, keyUp: shiftUp, */ className: 'keyboard__btn_shift', ru: { shift: 'Shift', noshift: 'Shift' }, en: { shift: 'Shift', noshift: 'Shift' },
+    row: 3, type: 'control', subtype: 'sticky', className: 'keyboard__btn_shift', ru: { shift: 'Shift', noshift: 'Shift' }, en: { shift: 'Shift', noshift: 'Shift' },
   },
   KeyZ: { row: 3, ru: { default: 'я' }, en: { default: 'z' } },
   KeyX: { row: 3, ru: { default: 'ч' }, en: { default: 'x' } },
@@ -80,7 +72,7 @@ export default {
     row: 3, type: 'control', ru: { default: '\u2191' }, en: { default: '\u2191' },
   },
   ShiftRight: {
-    row: 3, type: 'control', subtype: 'sticky', /* keyDown: shiftDown, keyUp: shiftUp, */ ru: { shift: 'Shift', noshift: 'Shift' }, en: { shift: 'Shift', noshift: 'Shift' },
+    row: 3, type: 'control', subtype: 'sticky', ru: { shift: 'Shift', noshift: 'Shift' }, en: { shift: 'Shift', noshift: 'Shift' },
   },
 
   ControlLeft: {

@@ -1,9 +1,8 @@
-/* eslint-disable import/extensions */
 /* eslint-disable max-classes-per-file */
-import DefaultButton from './defaultButton.js';
+import DefaultButton from './defaultButton';
 import {
   StickyButton, ShiftButton, ControlButton, CapsLockButton,
-} from './controlButton.js';
+} from './controlButton';
 
 class MetaButton extends DefaultButton {}
 

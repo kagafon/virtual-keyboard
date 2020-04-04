@@ -1,6 +1,5 @@
 /* eslint-disable max-classes-per-file */
-// eslint-disable-next-line import/extensions
-import DefaultButton from './defaultButton.js';
+import DefaultButton from './defaultButton';
 
 class StickyButton extends DefaultButton {
   constructor(code, keyboard, displayValues, className, side) {
