@@ -6,7 +6,7 @@ const shiftUp = () => (settings) => {
   settings.shift = 'noshift';
 }; */
 
-const buttons = {
+export default {
   Backquote: { row: 0, ru: { shift: 'Ё', noshift: 'ё' }, en: { shift: '~', noshift: '`' } },
   Digit1: { row: 0, ru: { shift: '!', noshift: '1' }, en: { shift: '!', noshift: '1' } },
   Digit2: { row: 0, ru: { shift: '"', noshift: '2' }, en: { shift: '@', noshift: '2' } },
@@ -111,5 +111,3 @@ const buttons = {
     row: 4, type: 'control', ru: { default: '\u2192' }, en: { default: '\u2192' },
   },
 };
-
-export { buttons as default };
