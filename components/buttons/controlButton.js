@@ -2,7 +2,12 @@
 // eslint-disable-next-line import/extensions
 import DefaultButton from './defaultButton.js';
 
-class StickyButton extends DefaultButton {}
+class StickyButton extends DefaultButton {
+  constructor(code, keyboard, displayValues, className, side) {
+    super(code, keyboard, displayValues, className);
+    this.side = side;
+  }
+}
 
 StickyButton.prototype.perfomAction = function perfomAction() {};
 
@@ -16,22 +21,12 @@ StickyButton.prototype.mouseDown = function mouseDown() {
   }
   this.perfomAction();
 };
+
 StickyButton.prototype.mouseUp = function mouseUp() {
-  this.keyboard.checkSpecialKeys();
-};
-
-StickyButton.prototype.keyUp = function keyUp() {
-  this.perfomAction();
-  this.uiElement.classList.remove(this.buttonPressedClassName);
-};
-
-StickyButton.prototype.keyDown = function keyDown() {
-  if (!this.uiElement.classList.contains(this.buttonPressedClassName)) {
-    this.perfomAction();
-    this.uiElement.classList.add(this.buttonPressedClassName);
+  if (this.keyboard.checkSpecialKeys()) {
+    this.keyboard.resetPressedControlButtons();
   }
 };
-
 class CapsLockButton extends StickyButton {}
 CapsLockButton.prototype.perfomAction = function perfomAction() {
   this.keyboard.capsLock = this.keyboard.capsLock === 'caps' ? 'nocaps' : 'caps';
@@ -48,6 +43,7 @@ CapsLockButton.prototype.mouseDown = function mouseDown() {
 };
 
 CapsLockButton.prototype.keyUp = function keyUp() {};
+
 CapsLockButton.prototype.reset = function reset() {};
 
 CapsLockButton.prototype.keyDown = function keyDown() {
@@ -55,14 +51,42 @@ CapsLockButton.prototype.keyDown = function keyDown() {
 };
 
 class ControlButton extends StickyButton {}
+
 ControlButton.prototype.perfomAction = function perfomAction() {
-  this.keyboard.ctrl = this.keyboard.ctrl === 'ctrl' ? 'noctrl' : 'ctrl';
+  this.keyboard[this.side] = this.keyboard[this.side] === 'ctrl' ? 'noctrl' : 'ctrl';
+  this.keyboard.update();
+};
+
+ControlButton.prototype.keyUp = function keyUp() {
+  this.keyboard.checkSpecialKeys();
+  this.keyboard[this.side] = 'noctrl';
+  this.uiElement.classList.remove(this.buttonPressedClassName);
+  this.keyboard.update();
+};
+
+ControlButton.prototype.keyDown = function keyDown() {
+  this.keyboard[this.side] = 'ctrl';
+  this.uiElement.classList.add(this.buttonPressedClassName);
   this.keyboard.update();
 };
 
 class ShiftButton extends StickyButton {}
+
 ShiftButton.prototype.perfomAction = function perfomAction() {
-  this.keyboard.shift = this.keyboard.shift === 'shift' ? 'noshift' : 'shift';
+  this.keyboard[this.side] = this.keyboard[this.side] === 'shift' ? 'noshift' : 'shift';
+  this.keyboard.update();
+};
+
+ShiftButton.prototype.keyUp = function keyUp() {
+  this.keyboard.checkSpecialKeys();
+  this.keyboard[this.side] = 'noshift';
+  this.uiElement.classList.remove(this.buttonPressedClassName);
+  this.keyboard.update();
+};
+
+ShiftButton.prototype.keyDown = function keyDown() {
+  this.keyboard[this.side] = 'shift';
+  this.uiElement.classList.add(this.buttonPressedClassName);
   this.keyboard.update();
 };
 

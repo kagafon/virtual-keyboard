@@ -17,13 +17,13 @@ export default class DefaultButton {
     this.uiElement = document.createElement('div');
     this.uiElement.classList.add('keyboard__btn');
     this.buttonPressedClassName = 'keyboard__btn_pressed';
-
+    this.mouseOutHandler = this.mouseUp.bind(this);
     if (className) this.uiElement.classList.add(className);
     this.repeatTimer = null;
 
     this.uiElement.addEventListener('mousedown', this.mouseDown.bind(this));
     this.uiElement.addEventListener('mouseup', this.mouseUp.bind(this));
-    this.uiElement.addEventListener('mouseout', this.mouseUp.bind(this));
+    this.uiElement.addEventListener('mouseout', this.mouseOutHandler);
     this.update();
   }
 
@@ -69,6 +69,11 @@ export default class DefaultButton {
       this.uiElement.classList.remove(this.buttonPressedClassName);
       this.keyboard.resetPressedControlButtons();
     }
+  }
+
+  mouseOut() {
+    this.mouseUp();
+    this.uiElement.removeEventListener('mouseout', this.mouseOutHandler);
   }
 
   // Process keyUp event

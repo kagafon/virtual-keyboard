@@ -8,10 +8,6 @@ const keyboardShiftedClassName = 'keyboard_shifted';
 export default class Keyboard {
   constructor(targetControl) {
     this.charRepeatTimer = null;
-    this.shift = 'noshift';
-    this.ctrl = 'noctrl';
-    this.alt = 'noalt';
-    this.capsLock = 'nocaps';
     this.targetControl = targetControl;
     this.controlButtonsPressed = {};
     // Attach events
@@ -51,6 +47,7 @@ export default class Keyboard {
       row.appendChild(btn.uiElement);
     });
     targetControl.uiElement.parentElement.appendChild(this.uiElement);
+    this.reset();
   }
 
   physicalKeyDown(evt) {
@@ -69,6 +66,17 @@ export default class Keyboard {
 
   reset() {
     Object.values(this.buttons).forEach((x) => x.reset());
+    Object.keys(this.controlButtonsPressed).forEach((x) => {
+      if (this.controlButtonsPressed[x]) {
+        this.controlButtonsPressed[x] = false;
+      }
+    });
+    this.rshift = 'noshift';
+    this.lshift = 'noshift';
+    this.rctrl = 'noctrl';
+    this.lctrl = 'noctrl';
+    this.alt = 'noalt';
+    this.update();
   }
 
   resetPressedControlButtons() {
@@ -83,7 +91,7 @@ export default class Keyboard {
   checkSpecialKeys() {
     if (this.shift === 'shift' && this.ctrl === 'ctrl') {
       this.lang = this.lang === 'ru' ? 'en' : 'ru';
-      this.resetPressedControlButtons();
+      this.update();
       return true;
     }
     return false;
@@ -189,5 +197,15 @@ export default class Keyboard {
   // eslint-disable-next-line class-methods-use-this
   set lang(value) {
     localStorage.setItem('virtual-keyboard.lang', value);
+  }
+
+  get shift() {
+    if (this.rshift === 'shift' || this.lshift === 'shift') return 'shift';
+    return 'noshift';
+  }
+
+  get ctrl() {
+    if (this.rctrl === 'ctrl' || this.lctrl === 'ctrl') return 'ctrl';
+    return 'noctrl';
   }
 }
