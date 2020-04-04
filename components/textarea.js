@@ -10,6 +10,8 @@ export default class Textarea {
       'Shift and Ctrl screen buttons stay "pressed" until other button is clicked ("sticky")',
       'Use Shift+Ctrl to switch language ("pressed" state is removed in this case)',
       '',
+      'Note: long-click on screen button will continiously insert symbols into textarea',
+      '',
       'Designed for MS Windows'].join('\n');
     parentControl.appendChild(this.uiElement);
   }

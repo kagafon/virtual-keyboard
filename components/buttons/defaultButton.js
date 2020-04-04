@@ -1,4 +1,4 @@
-const repeatTimeout = 200;
+const repeatTimeout = 300;
 
 const setRepeatButton = (callback, repeatTimer) => {
   if (repeatTimer !== null) {
