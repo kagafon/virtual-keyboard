@@ -47,6 +47,7 @@ export default class Keyboard {
       row.appendChild(btn.uiElement);
     });
     targetControl.uiElement.parentElement.appendChild(this.uiElement);
+    targetControl.setInstructions(this.lang);
     this.reset();
   }
 
@@ -91,6 +92,7 @@ export default class Keyboard {
   checkSpecialKeys() {
     if (this.shift === 'shift' && this.ctrl === 'ctrl') {
       this.lang = this.lang === 'ru' ? 'en' : 'ru';
+      this.targetControl.setInstructions(this.lang);
       this.update();
       return true;
     }
